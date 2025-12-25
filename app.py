@@ -18,20 +18,22 @@ uploaded_file = st.file_uploader(
     type=["mp3", "wav", "mp4", "mov"]
 )
 
-if uploaded_file:
-    # Save uploaded file to temp path
+# 🔒 EVERYTHING that uses `segments` MUST be inside this block
+if uploaded_file is not None:
+
+    # Save uploaded file temporarily
     with tempfile.NamedTemporaryFile(delete=False) as tmp:
         tmp.write(uploaded_file.read())
         file_path = tmp.name
 
     st.info("Transcribing… please wait ⏳")
 
-    # Transcribe (audio OR video handled internally)
+    # Transcribe
     segments, detected_lang = transcribe(file_path)
 
     st.success(f"Detected language: **{detected_lang.upper()}**")
 
-    # Output choice
+    # Output format selection
     output_choice = st.radio(
         "Choose subtitle output format:",
         [
@@ -40,17 +42,16 @@ if uploaded_file:
         ]
     )
 
-    # 🔴 SUBTITLE PROCESSING LOOP (IMPORTANT)
+    # ✅ SUBTITLE PROCESSING LOOP (SAFE)
     for seg in segments:
         original_text = seg["text"]
 
         if output_choice.startswith("Romanized"):
-            # Romanize everything except pure English
             seg["text"] = romanize_text(original_text, detected_lang)
         else:
             seg["text"] = original_text
 
-    # Write SRT file
+    # Write SRT
     srt_path = tempfile.mktemp(suffix=".srt")
     write_srt(segments, srt_path)
 
