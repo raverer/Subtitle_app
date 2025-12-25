@@ -11,7 +11,7 @@ st.set_page_config(
 )
 
 st.title("🎧 Free Subtitle Generator")
-st.write("Upload an audio or video file (best under 10 minutes).")
+st.write("Upload a short audio or video file (best results under 10 minutes).")
 
 uploaded_file = st.file_uploader(
     "Upload audio or video",
@@ -19,31 +19,38 @@ uploaded_file = st.file_uploader(
 )
 
 if uploaded_file:
-    # Save uploaded file temporarily
+    # Save uploaded file to temp path
     with tempfile.NamedTemporaryFile(delete=False) as tmp:
         tmp.write(uploaded_file.read())
         file_path = tmp.name
 
-    st.info("Analyzing and transcribing… Please wait ⏳")
+    st.info("Transcribing… please wait ⏳")
 
-    # Whisper handles both audio & video directly
+    # Transcribe (audio OR video handled internally)
     segments, detected_lang = transcribe(file_path)
 
     st.success(f"Detected language: **{detected_lang.upper()}**")
 
-    # ✅ STRONG, EXPLICIT SUBTITLE PROCESSING
-for seg in segments:
-    original_text = seg["text"]
+    # Output choice
+    output_choice = st.radio(
+        "Choose subtitle output format:",
+        [
+            "Original language (native script)",
+            "Romanized (Indian languages only)",
+        ]
+    )
 
-    if output_choice.startswith("Romanized"):
-        # Romanize everything except pure English
-        seg["text"] = romanize_text(original_text, detected_lang)
-    else:
-        # Keep original script
-        seg["text"] = original_text
+    # 🔴 SUBTITLE PROCESSING LOOP (IMPORTANT)
+    for seg in segments:
+        original_text = seg["text"]
 
+        if output_choice.startswith("Romanized"):
+            # Romanize everything except pure English
+            seg["text"] = romanize_text(original_text, detected_lang)
+        else:
+            seg["text"] = original_text
 
-    # Write SRT
+    # Write SRT file
     srt_path = tempfile.mktemp(suffix=".srt")
     write_srt(segments, srt_path)
 
