@@ -1,7 +1,8 @@
 from indic_transliteration import sanscript
 from indic_transliteration.sanscript import transliterate
 
-SUPPORTED = {
+# Supported Indian languages
+LANG_MAP = {
     "hi": sanscript.DEVANAGARI,
     "mr": sanscript.DEVANAGARI,
     "bn": sanscript.BENGALI,
@@ -12,11 +13,15 @@ SUPPORTED = {
 }
 
 def romanize_text(text, lang):
-    if lang not in SUPPORTED:
-        return text  # fallback
+    """
+    Romanizes Indian language text.
+    English words remain unchanged automatically.
+    """
+    if lang not in LANG_MAP:
+        return text
 
     return transliterate(
         text,
-        SUPPORTED[lang],
+        LANG_MAP[lang],
         sanscript.ITRANS
     )
