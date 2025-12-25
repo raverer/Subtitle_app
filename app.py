@@ -31,19 +31,17 @@ if uploaded_file:
 
     st.success(f"Detected language: **{detected_lang.upper()}**")
 
-    output_choice = st.radio(
-        "Choose subtitle output format:",
-        [
-            "Original language (native script)",
-            "Romanized (Indian languages only)"
-        ]
-    )
+    # ✅ STRONG, EXPLICIT SUBTITLE PROCESSING
+for seg in segments:
+    original_text = seg["text"]
 
-    # Process subtitle text
-    for seg in segments:
-        if output_choice.startswith("Romanized"):
-            if detected_lang != "en":
-                seg["text"] = romanize_text(seg["text"], detected_lang)
+    if output_choice.startswith("Romanized"):
+        # Romanize everything except pure English
+        seg["text"] = romanize_text(original_text, detected_lang)
+    else:
+        # Keep original script
+        seg["text"] = original_text
+
 
     # Write SRT
     srt_path = tempfile.mktemp(suffix=".srt")
