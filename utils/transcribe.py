@@ -3,15 +3,15 @@ from faster_whisper import WhisperModel
 model = WhisperModel(
     "small",
     device="cpu",
-    compute_type="float32"   # IMPORTANT: accuracy > speed
+    compute_type="float32"
 )
 
 def transcribe(file_path):
     segments_gen, info = model.transcribe(
         file_path,
-        language="hi",        # Force Hindi (works well for Hinglish)
-        beam_size=10,         # Better decoding
-        vad_filter=True       # Removes noise / silence
+        language="hi",        # Best for Hindi / Hinglish
+        beam_size=10,
+        vad_filter=True
     )
 
     segments = []
