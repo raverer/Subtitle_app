@@ -1,11 +1,13 @@
 import whisper
 
-# Load once (important for performance)
+# Load model once (important for performance)
 model = whisper.load_model("small")
 
-def transcribe(audio_path):
-    result = model.transcribe(
-        audio_path,
-        word_timestamps=False
-    )
+def transcribe(file_path):
+    """
+    Transcribes audio or video and returns:
+    - segments (with timestamps)
+    - detected language
+    """
+    result = model.transcribe(file_path)
     return result["segments"], result["language"]
