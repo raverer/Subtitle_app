@@ -1,16 +1,17 @@
 from faster_whisper import WhisperModel
 
-# CPU-only, Streamlit-safe
 model = WhisperModel(
     "small",
     device="cpu",
-    compute_type="int8"
+    compute_type="float32"   # IMPORTANT: accuracy > speed
 )
 
 def transcribe(file_path):
     segments_gen, info = model.transcribe(
         file_path,
-        beam_size=5
+        language="hi",        # Force Hindi (works well for Hinglish)
+        beam_size=10,         # Better decoding
+        vad_filter=True       # Removes noise / silence
     )
 
     segments = []
@@ -18,7 +19,7 @@ def transcribe(file_path):
         segments.append({
             "start": seg.start,
             "end": seg.end,
-            "text": seg.text
+            "text": seg.text.strip()
         })
 
     return segments, info.language
